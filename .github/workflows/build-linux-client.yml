@@ -18,13 +18,18 @@ jobs:
       npm_config_msvs_version: '2022'
     steps:
       - name: Checkout this repo/branch to C-drive (fork-agnostic)
-        uses: actions/checkout@v4
-        with:
-          path: C:/b
-          ref: ${{ github.ref_name }}
-          fetch-depth: 1
-          submodules: recursive
-          token: ${{ github.token }}
+        shell: bash
+        run: |
+          mkdir -p /c/b && cd /c/b
+          git init .
+          git config core.symlinks true
+          git config --global credential.helper ""
+          git config --system credential.helper ""
+          # Public repo — clone without auth to avoid credential prompts
+          git remote add origin "${{ github.server_url }}/${{ github.repository }}.git"
+          GIT_TERMINAL_PROMPT=0 git fetch --depth=1 origin "+refs/heads/${{ github.ref_name }}:"
+          git checkout FETCH_HEAD
+          git submodule update --jobs=8 --init --depth=1 || true
 
       - name: Setup Node
         uses: actions/setup-node@v4
