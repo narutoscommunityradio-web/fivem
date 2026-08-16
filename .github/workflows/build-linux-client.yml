@@ -23,9 +23,12 @@ jobs:
           mkdir -p /c/b && cd /c/b
           git init .
           git config core.symlinks true
+          git config --global credential.helper ""
+          git config --system credential.helper ""
+          git config --local credential.helper ""
           # Build THIS repo at the branch the workflow was dispatched on (works on any fork).
           git remote add origin "${{ github.server_url }}/${{ github.repository }}.git"
-          git -c http.extraheader="AUTHORIZATION: bearer ${{ github.token }}" pull origin "${{ github.ref_name }}" --depth=1
+          GIT_TERMINAL_PROMPT=0 git -c http.extraheader="AUTHORIZATION: bearer ${{ github.token }}" pull origin "${{ github.ref_name }}" --depth=1
           git submodule update --jobs=8 --init --depth=1
 
       - name: Setup Node
